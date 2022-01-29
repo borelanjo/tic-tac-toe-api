@@ -58,12 +58,8 @@ public class BoardServiceImpl implements BoardService {
             board.setWinner(winnerX.get());
             return;
         }
-        Optional<Character> winnerO = findWinner(board,  'O');
 
-        if (winnerO.isPresent()) {
-            board.setWinner(winnerO.get());
-            return;
-        }
+        findWinner(board,  'O').ifPresent(board::setWinner);
 
     }
 
