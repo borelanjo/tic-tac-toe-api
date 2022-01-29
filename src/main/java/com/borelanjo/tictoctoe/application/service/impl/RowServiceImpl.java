@@ -7,11 +7,13 @@ import com.borelanjo.tictoctoe.domain.service.RowService;
 import com.borelanjo.tictoctoe.repository.ColumnRepository;
 import com.borelanjo.tictoctoe.repository.RowRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
 
 @AllArgsConstructor
+@Service
 public class RowServiceImpl implements RowService {
 
     private final RowRepository rowRepository;

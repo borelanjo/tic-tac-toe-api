@@ -182,8 +182,6 @@ class BoardServiceTest {
         boardService.play(board.getId(), board.getRows().get(1).getColumns().get(2).getId());
         boardService.play(board.getId(), board.getRows().get(0).getColumns().get(2).getId());
 
-        boardService.play(board.getId(), board.getRows().get(0).getColumns().get(2).getId());
-
         final var exception = Assertions.assertThrows(
                 AlreadyWinnerException.class, () -> boardService
                         .play(board.getId(), board.getRows().get(0).getColumns().get(2).getId()));

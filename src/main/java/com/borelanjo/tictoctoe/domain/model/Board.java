@@ -16,9 +16,10 @@ public class Board {
 
     @Override
     public String toString() {
-        return String.format("Board{id=%s, input=%s,\nrows=[\n%s,\n%s\n%s]\n}",
+        return String.format("Board{id=%s, input=%s, winner=%s, \nrows=[\n%s,\n%s\n%s]\n}",
                 getId(),
                 getInput(),
+                getWinner(),
                 getRows().get(0),
                 getRows().get(1),
                 getRows().get(2));

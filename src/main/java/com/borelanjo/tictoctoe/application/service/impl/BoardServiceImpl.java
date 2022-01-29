@@ -9,6 +9,7 @@ import com.borelanjo.tictoctoe.domain.service.RowService;
 import com.borelanjo.tictoctoe.repository.BoardRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -16,6 +17,7 @@ import java.util.stream.IntStream;
 
 @AllArgsConstructor
 @Slf4j
+@Service
 public class BoardServiceImpl implements BoardService {
 
     private final BoardRepository boardRepository;

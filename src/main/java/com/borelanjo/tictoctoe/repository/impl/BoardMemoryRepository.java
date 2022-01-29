@@ -3,10 +3,12 @@ package com.borelanjo.tictoctoe.repository.impl;
 import com.borelanjo.tictoctoe.domain.model.Board;
 import com.borelanjo.tictoctoe.domain.model.Row;
 import com.borelanjo.tictoctoe.repository.BoardRepository;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class BoardMemoryRepository implements BoardRepository {
 
     private Long currentId = 1L;

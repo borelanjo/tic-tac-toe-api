@@ -6,10 +6,12 @@ import com.borelanjo.tictoctoe.domain.model.Column;
 import com.borelanjo.tictoctoe.domain.service.ColumnService;
 import com.borelanjo.tictoctoe.repository.ColumnRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
 @AllArgsConstructor
+@Service
 public class ColumnServiceImpl implements ColumnService {
 
     private final ColumnRepository columnRepository;

@@ -2,10 +2,12 @@ package com.borelanjo.tictoctoe.repository.impl;
 
 import com.borelanjo.tictoctoe.domain.model.Column;
 import com.borelanjo.tictoctoe.repository.ColumnRepository;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class ColumnMemoryRepository implements ColumnRepository {
 
     private Long currentId = 1L;
