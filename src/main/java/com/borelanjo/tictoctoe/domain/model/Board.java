@@ -12,6 +12,7 @@ public class Board {
     private Long id;
     private Character input;
     private List<Row> rows;
+    private Character winner;
 
     @Override
     public String toString() {

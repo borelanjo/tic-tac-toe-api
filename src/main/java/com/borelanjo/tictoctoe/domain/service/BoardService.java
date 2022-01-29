@@ -11,4 +11,6 @@ public interface BoardService {
     Board play(Long boardId, Long columnId);
 
     Board find(Long boardId);
+
+    void checkWinner(Board board);
 }
