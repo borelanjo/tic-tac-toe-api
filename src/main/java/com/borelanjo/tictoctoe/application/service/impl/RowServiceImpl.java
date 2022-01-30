@@ -1,5 +1,6 @@
 package com.borelanjo.tictoctoe.application.service.impl;
 
+import com.borelanjo.tictoctoe.domain.model.Board;
 import com.borelanjo.tictoctoe.domain.model.Column;
 import com.borelanjo.tictoctoe.domain.model.Row;
 import com.borelanjo.tictoctoe.domain.service.RowService;
@@ -7,7 +8,9 @@ import com.borelanjo.tictoctoe.infrastructure.persistence.repository.RowReposito
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @AllArgsConstructor
 @Service
@@ -16,12 +19,17 @@ public class RowServiceImpl implements RowService {
     private final RowRepository rowRepository;
 
     @Override
-    public Row init(final List<Column> columns) {
-        return rowRepository.init(columns);
+    public Row init(final Board board) {
+        final var row = Row.builder()
+                .board(board)
+                .code(UUID.randomUUID())
+                .createdAt(LocalDateTime.now())
+                .build();
+        return rowRepository.save(row);
     }
 
     @Override
     public Row find(Long rowId) {
-        return rowRepository.find(rowId);
+        return rowRepository.findById(rowId).orElseThrow();
     }
 }

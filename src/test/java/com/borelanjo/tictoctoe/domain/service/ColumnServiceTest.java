@@ -34,7 +34,7 @@ class ColumnServiceTest {
     @Test
     void shouldInitANewColumnWhenRequest() {
         mockRepositorySave(getBuild(LocalDateTime.now()).build());
-        final var columnA = columnService.init();
+        final var columnA = columnService.init(null);
 
         Assertions.assertNotNull(columnA);
         Assertions.assertEquals(1L, columnA.getId());
@@ -67,7 +67,7 @@ class ColumnServiceTest {
 
     @Test
     void shouldNotPlayWhenHaveInvalidInput() {
-        columnService.init();
+        columnService.init(null);
         final var invalidInput = '0';
         final var exception = Assertions.assertThrows(
                 InvalidInputSquareException.class, () -> columnService.play(1L, invalidInput));

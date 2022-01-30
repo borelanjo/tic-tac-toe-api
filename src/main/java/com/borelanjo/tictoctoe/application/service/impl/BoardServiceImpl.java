@@ -12,8 +12,10 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
 @AllArgsConstructor
@@ -29,29 +31,31 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public Board init() {
-        return boardRepository.init(Arrays.asList(
-                initRow(), initRow(), initRow()
-        ));
+        Board board = boardRepository.save(Board.builder()
+                .input('X')
+                .code(UUID.randomUUID())
+                .createdAt(LocalDateTime.now())
+                .build());
+
+        initRow(board);
+        initRow(board);
+        initRow(board);
+
+        return find(board.getId());
     }
 
     @Override
     public Board play(Long boardId, Long columnId) {
-        Board board = boardRepository.find(boardId);
+        Board board = find(boardId);
 
         validateWinner(board);
 
-        Column column = columnService.play(columnId, board.getInput());
-
-        board.getRows().forEach(r-> {
-            for (int i = 0; i < r.getColumns().size(); i++){
-                if(r.getColumns().get(i).equals(column)){
-                    r.getColumns().set(i, column);
-                }
-            }
-        });
+        columnService.play(columnId, board.getInput());
 
         switchInput(board);
         checkWinner(board);
+        board.setUpdatedAt(LocalDateTime.now());
+        board = boardRepository.save(board);
 
         log.info("play={}", board);
         return board;
@@ -59,7 +63,7 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public Board find(Long boardId) {
-        return boardRepository.find(boardId);
+        return boardRepository.findById(boardId).orElseThrow();
     }
 
     @Override
@@ -70,7 +74,7 @@ public class BoardServiceImpl implements BoardService {
             return;
         }
 
-        findWinner(board,  'O').ifPresent(board::setWinner);
+        findWinner(board, 'O').ifPresent(board::setWinner);
 
     }
 
@@ -81,18 +85,24 @@ public class BoardServiceImpl implements BoardService {
     }
 
     private Optional<Character> findWinner(final Board board, final Character character) {
-        return  isSameLineWinner(board, character)
+        return isSameLineWinner(board, character)
                 || isSameColumnWinner(board, character)
-                ||  isDiagonalWinner(board, character)
+                || isDiagonalWinner(board, character)
                 ? Optional.of(character) : Optional.empty();
     }
 
     private boolean isDiagonalWinner(Board board, Character character) {
-
+        ArrayList<Row> rows = new ArrayList<>(board.getRows());
         return IntStream.range(0, board.getRows().size())
-                .allMatch(i -> board.getRows().get(i).getColumns().get(i).getSquare() == character)
+                .allMatch(i -> {
+                    ArrayList<Column> columns = new ArrayList<>(rows.get(i).getColumns());
+                    return columns.get(i).getSquare() == character;
+                })
                 || IntStream.range(0, board.getRows().size())
-                .allMatch(i -> board.getRows().get(i).getColumns().get(2 - i).getSquare() == character)
+                .allMatch(i -> {
+                    ArrayList<Column> columns = new ArrayList<>(rows.get(i).getColumns());
+                    return columns.get(2 - i).getSquare() == character;
+                })
                 ;
     }
 
@@ -114,20 +124,24 @@ public class BoardServiceImpl implements BoardService {
     }
 
     private boolean isWinnerSameLineColumn(final Board board, final Character character, final int columnIndex) {
-        return board.getRows().get(0).getColumns().get(columnIndex).getSquare() == character
-                && board.getRows().get(1).getColumns().get(columnIndex).getSquare() == character
-                && board.getRows().get(2).getColumns().get(columnIndex).getSquare() == character;
+        ArrayList<Row> rows = new ArrayList<>(board.getRows());
+        ArrayList<Column> columnsRow1 = new ArrayList<>(rows.get(0).getColumns());
+        ArrayList<Column> columnsRow2 = new ArrayList<>(rows.get(1).getColumns());
+        ArrayList<Column> columnsRow3 = new ArrayList<>(rows.get(2).getColumns());
+        return columnsRow1.get(columnIndex).getSquare() == character
+                && columnsRow2.get(columnIndex).getSquare() == character
+                && columnsRow3.get(columnIndex).getSquare() == character;
     }
 
     private void switchInput(final Board board) {
         board.setInput(board.getInput() == 'X' ? 'O' : 'X');
     }
 
-    private Row initRow() {
-        return rowService.init(Arrays.asList(
-                columnService.init(),
-                columnService.init(),
-                columnService.init())
-        );
+    private void initRow(final Board board) {
+        Row row = rowService.init(board);
+
+        columnService.init(row);
+        columnService.init(row);
+        columnService.init(row);
     }
 }

@@ -1,13 +1,11 @@
 package com.borelanjo.tictoctoe.infrastructure.persistence.repository;
 
-import com.borelanjo.tictoctoe.domain.model.Column;
 import com.borelanjo.tictoctoe.domain.model.Row;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
+@Repository
+public interface RowRepository extends JpaRepository<Row, Long> {
 
-public interface RowRepository {
 
-    Row init(final List<Column> columns);
-
-    Row find(final Long rowId);
 }

@@ -9,6 +9,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -24,13 +26,18 @@ public class Column {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @javax.persistence.Column(name = "id_column")
     private Long id;
 
-    @javax.persistence.Column
+    @javax.persistence.Column(name = "code_column")
     private UUID code;
 
     @javax.persistence.Column
     private Character square;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "id_row")
+    private Row row;
 
     @javax.persistence.Column(name = "created_at")
     private LocalDateTime createdAt;

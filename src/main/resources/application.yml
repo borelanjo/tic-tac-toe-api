@@ -6,6 +6,10 @@ spring:
     url: ${DB_POS_URL:jdbc:postgresql://localhost:5432/tic-toc-toe?createDatabaseIfNotExist=true}
     username: ${DB_POS_USERNAME:game}
     password: ${DB_POS_PASSWORD:game}
+  flyway:
+    schemas:
+      - game
+    default-schema: game
   # JPA properties
   jpa:
     hibernate:

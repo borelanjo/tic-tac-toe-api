@@ -6,9 +6,9 @@ import com.borelanjo.tictoctoe.application.service.impl.ColumnServiceImpl;
 import com.borelanjo.tictoctoe.application.service.impl.RowServiceImpl;
 import com.borelanjo.tictoctoe.domain.model.Board;
 import com.borelanjo.tictoctoe.domain.model.Column;
+import com.borelanjo.tictoctoe.infrastructure.persistence.repository.BoardRepository;
 import com.borelanjo.tictoctoe.infrastructure.persistence.repository.ColumnRepository;
-import com.borelanjo.tictoctoe.infrastructure.persistence.repository.impl.BoardMemoryRepository;
-import com.borelanjo.tictoctoe.infrastructure.persistence.repository.impl.RowMemoryRepository;
+import com.borelanjo.tictoctoe.infrastructure.persistence.repository.RowRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,8 +31,8 @@ class BoardServiceTest {
     private void setup() {
         columnRepository = Mockito.mock(ColumnRepository.class);
         boardService = new BoardServiceImpl(
-                new BoardMemoryRepository(),
-                new RowServiceImpl(new RowMemoryRepository()),
+                Mockito.mock(BoardRepository.class),
+                new RowServiceImpl(Mockito.mock(RowRepository.class)),
                 new ColumnServiceImpl(columnRepository)
                 );
 
