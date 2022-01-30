@@ -2,11 +2,12 @@ package com.borelanjo.tictoctoe.application.service.impl;
 
 import com.borelanjo.tictoctoe.application.service.exception.AlreadyWinnerException;
 import com.borelanjo.tictoctoe.domain.model.Board;
+import com.borelanjo.tictoctoe.domain.model.Column;
 import com.borelanjo.tictoctoe.domain.model.Row;
 import com.borelanjo.tictoctoe.domain.service.BoardService;
 import com.borelanjo.tictoctoe.domain.service.ColumnService;
 import com.borelanjo.tictoctoe.domain.service.RowService;
-import com.borelanjo.tictoctoe.repository.BoardRepository;
+import com.borelanjo.tictoctoe.infrastructure.persistence.repository.BoardRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,15 @@ public class BoardServiceImpl implements BoardService {
 
         validateWinner(board);
 
-        columnService.play(columnId, board.getInput());
+        Column column = columnService.play(columnId, board.getInput());
+
+        board.getRows().forEach(r-> {
+            for (int i = 0; i < r.getColumns().size(); i++){
+                if(r.getColumns().get(i).equals(column)){
+                    r.getColumns().set(i, column);
+                }
+            }
+        });
 
         switchInput(board);
         checkWinner(board);

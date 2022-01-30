@@ -4,28 +4,36 @@ import com.borelanjo.tictoctoe.application.service.exception.AlreadyPlayedThisCo
 import com.borelanjo.tictoctoe.application.service.exception.InvalidInputSquareException;
 import com.borelanjo.tictoctoe.application.service.impl.ColumnServiceImpl;
 import com.borelanjo.tictoctoe.domain.model.Column;
-import com.borelanjo.tictoctoe.repository.ColumnRepository;
-import com.borelanjo.tictoctoe.repository.impl.ColumnMemoryRepository;
+import com.borelanjo.tictoctoe.infrastructure.persistence.repository.ColumnRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
 
+import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 class ColumnServiceTest {
 
     private ColumnService columnService;
 
+    private ColumnRepository columnRepository;
+
     @BeforeEach
     void setUp() {
-        ColumnRepository columnRepository = new ColumnMemoryRepository();
+        columnRepository = Mockito.mock(ColumnRepository.class);
         columnService = new ColumnServiceImpl(columnRepository);
     }
 
     @Test
     void shouldInitANewColumnWhenRequest() {
+        mockRepositorySave(getBuild(LocalDateTime.now()).build());
         final var columnA = columnService.init();
 
         Assertions.assertNotNull(columnA);
@@ -33,24 +41,28 @@ class ColumnServiceTest {
         Assertions.assertNull(columnA.getSquare());
     }
 
-    @Test
-    void shouldPlayWhenHaveInputX() {
-        columnService.init();
-        final var columnA = columnService.play(1L, 'X');
+    @ParameterizedTest(name = "shouldPlayWhenHaveInput{0}")
+    @ValueSource(strings = {"O", "X"})
+    void shouldPlayWhenHaveInput(final char square) {
+        final LocalDateTime createdAt = LocalDateTime.of(2022, 6, 18, 18, 0, 0);
+        final LocalDateTime expectedUpdateAt = LocalDateTime.of(2022, 6, 18, 20, 0, 0);
+        final long expectedId = 1L;
+
+        final var columnFind = getBuild(createdAt).build();
+        mockRepositoryFindById(columnFind);
+
+        mockRepositorySave(getBuild(createdAt)
+                .square(square)
+                .updatedAt(expectedUpdateAt)
+                .build());
+
+        final var columnA = columnService.play(expectedId, square);
 
         Assertions.assertNotNull(columnA);
-        Assertions.assertEquals(1L, columnA.getId());
-        Assertions.assertEquals('X', columnA.getSquare());
-    }
-
-    @Test
-    void shouldPlayWhenHaveInputO() {
-        columnService.init();
-        final var columnA = columnService.play(1L, 'O');
-
-        Assertions.assertNotNull(columnA);
-        Assertions.assertEquals(1L, columnA.getId());
-        Assertions.assertEquals('O', columnA.getSquare());
+        Assertions.assertEquals(expectedId, columnA.getId());
+        Assertions.assertEquals(square, columnA.getSquare());
+        Assertions.assertEquals(createdAt, columnA.getCreatedAt());
+        Assertions.assertEquals(expectedUpdateAt, columnA.getUpdatedAt());
     }
 
     @Test
@@ -66,8 +78,15 @@ class ColumnServiceTest {
 
     @Test
     void shouldNotPlayTwiceInSameColumn() {
-        columnService.init();
-        columnService.play(1L, 'X');
+        final LocalDateTime createdAt = LocalDateTime.of(2022, 6, 18, 18, 0, 0);
+        final LocalDateTime expectedUpdateAt = LocalDateTime.of(2022, 6, 18, 20, 0, 0);
+        final long expectedId = 1L;
+
+        final var columnFind = getBuild(createdAt)
+                .updatedAt(expectedUpdateAt).build();
+        mockRepositoryFindById(columnFind);
+
+        columnService.play(expectedId, 'X');
         final var exception = Assertions.assertThrows(
                 AlreadyPlayedThisColumnException.class, () -> columnService.play(1L, 'X'));
 
@@ -82,5 +101,22 @@ class ColumnServiceTest {
 
         Assertions.assertEquals(
                 "No value present", exception.getMessage());
+    }
+
+    private void mockRepositorySave(final Column columnReturned) {
+        when(columnRepository.save(Mockito.any(Column.class)))
+                .thenReturn(columnReturned);
+    }
+
+    private Column.ColumnBuilder getBuild(final LocalDateTime createdAt) {
+        return Column.builder()
+                .id(1L)
+                .code(UUID.randomUUID())
+                .createdAt(createdAt);
+    }
+
+    private void mockRepositoryFindById(final Column columnReturned) {
+
+        when(columnRepository.findById(columnReturned.getId())).thenReturn(Optional.of(columnReturned));
     }
 }

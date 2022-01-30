@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+
+  #############################################################
+  ######################### DATABASES #########################
+  #############################################################
+
+  db-tic-toc-toe:
+    container_name: db-tic-toc-toe
+    image: postgres
+    restart: always
+    hostname: db-tic-toc-toe
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: tic-toc-toe
+      POSTGRES_USER: game
+      POSTGRES_PASSWORD: game
+      PGDATA: /tmp
+    volumes:
+      - ./docker/postgres/data-tic-toc-toe:/var/lib/postgresql/data

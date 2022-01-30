@@ -2,8 +2,8 @@ package com.borelanjo.tictoctoe.domain.service;
 
 import com.borelanjo.tictoctoe.application.service.impl.RowServiceImpl;
 import com.borelanjo.tictoctoe.domain.model.Row;
-import com.borelanjo.tictoctoe.repository.RowRepository;
-import com.borelanjo.tictoctoe.repository.impl.RowMemoryRepository;
+import com.borelanjo.tictoctoe.infrastructure.persistence.repository.RowRepository;
+import com.borelanjo.tictoctoe.infrastructure.persistence.repository.impl.RowMemoryRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

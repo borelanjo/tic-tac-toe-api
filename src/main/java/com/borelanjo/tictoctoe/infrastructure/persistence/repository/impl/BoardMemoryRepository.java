@@ -1,8 +1,8 @@
-package com.borelanjo.tictoctoe.repository.impl;
+package com.borelanjo.tictoctoe.infrastructure.persistence.repository.impl;
 
 import com.borelanjo.tictoctoe.domain.model.Board;
 import com.borelanjo.tictoctoe.domain.model.Row;
-import com.borelanjo.tictoctoe.repository.BoardRepository;
+import com.borelanjo.tictoctoe.infrastructure.persistence.repository.BoardRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

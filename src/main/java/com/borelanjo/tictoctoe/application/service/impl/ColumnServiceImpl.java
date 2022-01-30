@@ -4,11 +4,13 @@ import com.borelanjo.tictoctoe.application.service.exception.AlreadyPlayedThisCo
 import com.borelanjo.tictoctoe.application.service.exception.InvalidInputSquareException;
 import com.borelanjo.tictoctoe.domain.model.Column;
 import com.borelanjo.tictoctoe.domain.service.ColumnService;
-import com.borelanjo.tictoctoe.repository.ColumnRepository;
+import com.borelanjo.tictoctoe.infrastructure.persistence.repository.ColumnRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 @AllArgsConstructor
 @Service
@@ -18,18 +20,25 @@ public class ColumnServiceImpl implements ColumnService {
 
     @Override
     public Column init() {
-        return columnRepository.init();
+        final var column = Column.builder()
+                .code(UUID.randomUUID())
+                .createdAt(LocalDateTime.now())
+                .build();
+        return columnRepository.save(column);
     }
 
     @Override
     public Column play(Long columnId, Character square) {
         validateInput(square);
 
-        Column column = columnRepository.find(columnId);
+        Column column = columnRepository.findById(columnId).orElseThrow();
 
         validatePlayable(column);
 
-        return columnRepository.play(column, square);
+        column.setSquare(square);
+        column.setUpdatedAt(LocalDateTime.now());
+
+        return columnRepository.save(column);
     }
 
     private void validatePlayable(Column column) {

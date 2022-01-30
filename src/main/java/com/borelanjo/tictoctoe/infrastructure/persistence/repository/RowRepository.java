@@ -1,4 +1,4 @@
-package com.borelanjo.tictoctoe.repository;
+package com.borelanjo.tictoctoe.infrastructure.persistence.repository;
 
 import com.borelanjo.tictoctoe.domain.model.Column;
 import com.borelanjo.tictoctoe.domain.model.Row;
