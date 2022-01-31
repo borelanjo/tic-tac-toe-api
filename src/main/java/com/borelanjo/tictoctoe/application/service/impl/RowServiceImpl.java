@@ -3,6 +3,7 @@ package com.borelanjo.tictoctoe.application.service.impl;
 import com.borelanjo.tictoctoe.domain.model.Board;
 import com.borelanjo.tictoctoe.domain.model.Column;
 import com.borelanjo.tictoctoe.domain.model.Row;
+import com.borelanjo.tictoctoe.domain.model.RowPosition;
 import com.borelanjo.tictoctoe.domain.service.RowService;
 import com.borelanjo.tictoctoe.infrastructure.persistence.repository.RowRepository;
 import lombok.AllArgsConstructor;
@@ -19,10 +20,11 @@ public class RowServiceImpl implements RowService {
     private final RowRepository rowRepository;
 
     @Override
-    public Row init(final Board board) {
+    public Row init(final Board board, final RowPosition position) {
         final var row = Row.builder()
                 .board(board)
                 .code(UUID.randomUUID())
+                .position(position)
                 .createdAt(LocalDateTime.now())
                 .build();
         return rowRepository.save(row);

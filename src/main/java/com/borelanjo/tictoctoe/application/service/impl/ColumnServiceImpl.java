@@ -3,7 +3,9 @@ package com.borelanjo.tictoctoe.application.service.impl;
 import com.borelanjo.tictoctoe.application.service.exception.AlreadyPlayedThisColumnException;
 import com.borelanjo.tictoctoe.application.service.exception.InvalidInputSquareException;
 import com.borelanjo.tictoctoe.domain.model.Column;
+import com.borelanjo.tictoctoe.domain.model.ColumnPosition;
 import com.borelanjo.tictoctoe.domain.model.Row;
+import com.borelanjo.tictoctoe.domain.model.RowPosition;
 import com.borelanjo.tictoctoe.domain.service.ColumnService;
 import com.borelanjo.tictoctoe.infrastructure.persistence.repository.ColumnRepository;
 import lombok.AllArgsConstructor;
@@ -20,10 +22,11 @@ public class ColumnServiceImpl implements ColumnService {
     private final ColumnRepository columnRepository;
 
     @Override
-    public Column init(final Row row) {
+    public Column init(final Row row, final ColumnPosition position) {
         final var column = Column.builder()
                 .code(UUID.randomUUID())
                 .row(row)
+                .position(position)
                 .createdAt(LocalDateTime.now())
                 .build();
         return columnRepository.save(column);
@@ -41,6 +44,13 @@ public class ColumnServiceImpl implements ColumnService {
         column.setUpdatedAt(LocalDateTime.now());
 
         return columnRepository.save(column);
+    }
+
+    @Override
+    public Column findBy(RowPosition rowPosition, ColumnPosition columnPosition, UUID boardCode) {
+        return columnRepository
+                .findByPositionAndRowPositionAndRowBoardCode(columnPosition, rowPosition, boardCode)
+                .orElseThrow();
     }
 
     private void validatePlayable(Column column) {

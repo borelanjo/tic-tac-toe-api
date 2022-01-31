@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -41,6 +43,10 @@ public class Row {
     @JoinColumn(name = "id_board")
     private Board board;
 
+    @Enumerated(EnumType.STRING)
+    @javax.persistence.Column(name = "position_row")
+    private RowPosition position;
+
     @OneToMany(mappedBy = "row", fetch = FetchType.EAGER)
     @OrderBy(value = "id")
     private Set<Column> columns;
@@ -67,7 +73,7 @@ public class Row {
     @Override
     public String toString() {
         return "Row{" +
-                "id=" + id +
+                "position=" + position +
                 ", columns=" + columns +
                 '}';
     }

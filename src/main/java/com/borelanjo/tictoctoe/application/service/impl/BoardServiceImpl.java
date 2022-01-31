@@ -3,7 +3,9 @@ package com.borelanjo.tictoctoe.application.service.impl;
 import com.borelanjo.tictoctoe.application.service.exception.AlreadyWinnerException;
 import com.borelanjo.tictoctoe.domain.model.Board;
 import com.borelanjo.tictoctoe.domain.model.Column;
+import com.borelanjo.tictoctoe.domain.model.ColumnPosition;
 import com.borelanjo.tictoctoe.domain.model.Row;
+import com.borelanjo.tictoctoe.domain.model.RowPosition;
 import com.borelanjo.tictoctoe.domain.service.BoardService;
 import com.borelanjo.tictoctoe.domain.service.ColumnService;
 import com.borelanjo.tictoctoe.domain.service.RowService;
@@ -13,10 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.IntStream;
 
 @AllArgsConstructor
 @Slf4j
@@ -37,20 +37,22 @@ public class BoardServiceImpl implements BoardService {
                 .createdAt(LocalDateTime.now())
                 .build());
 
-        initRow(board);
-        initRow(board);
-        initRow(board);
+        initRow(board, RowPosition.TOP);
+        initRow(board, RowPosition.MIDDLE);
+        initRow(board, RowPosition.BOTTOM);
 
-        return find(board.getId());
+        return find(board.getCode());
     }
 
     @Override
-    public Board play(Long boardId, Long columnId) {
-        Board board = find(boardId);
+    public Board play(UUID boardCode, RowPosition rowPosition, ColumnPosition columnPosition) {
+        Board board = find(boardCode);
 
         validateWinner(board);
 
-        columnService.play(columnId, board.getInput());
+        Column column = columnService.findBy(rowPosition, columnPosition, board.getCode());
+
+        columnService.play(column.getId(), board.getInput());
 
         switchInput(board);
         checkWinner(board);
@@ -62,8 +64,10 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public Board find(Long boardId) {
-        return boardRepository.findById(boardId).orElseThrow();
+    public Board find(UUID boardCode) {
+        return boardRepository
+                .findByCode(boardCode)
+                .orElseThrow();
     }
 
     @Override
@@ -92,56 +96,71 @@ public class BoardServiceImpl implements BoardService {
     }
 
     private boolean isDiagonalWinner(Board board, Character character) {
-        ArrayList<Row> rows = new ArrayList<>(board.getRows());
-        return IntStream.range(0, board.getRows().size())
-                .allMatch(i -> {
-                    ArrayList<Column> columns = new ArrayList<>(rows.get(i).getColumns());
-                    return columns.get(i).getSquare() == character;
-                })
-                || IntStream.range(0, board.getRows().size())
-                .allMatch(i -> {
-                    ArrayList<Column> columns = new ArrayList<>(rows.get(i).getColumns());
-                    return columns.get(2 - i).getSquare() == character;
-                })
-                ;
+        final int winnerResult = character*3;
+        return sumDiagonalLeft(board) == winnerResult || sumDiagonalRight(board) == winnerResult ;
+    }
+
+    private int sumDiagonalLeft(Board board) {
+        final var squareLeft = columnService.findBy(RowPosition.TOP, ColumnPosition.LEFT, board.getCode()).getSquare();
+        final var squareMiddle = columnService.findBy(RowPosition.MIDDLE, ColumnPosition.MIDDLE, board.getCode()).getSquare();
+        final var squareRight = columnService.findBy(RowPosition.BOTTOM, ColumnPosition.RIGHT, board.getCode()).getSquare();
+        return squareLeft != null && squareMiddle != null && squareRight != null
+                ? squareLeft+squareMiddle+squareRight
+                : 0;
+    }
+
+    private int sumDiagonalRight(Board board) {
+        final var squareRight = columnService.findBy(RowPosition.TOP, ColumnPosition.RIGHT, board.getCode()).getSquare();
+        final var squareMiddle = columnService.findBy(RowPosition.MIDDLE, ColumnPosition.MIDDLE, board.getCode()).getSquare();
+        final var squareLeft = columnService.findBy(RowPosition.BOTTOM, ColumnPosition.LEFT, board.getCode()).getSquare();
+        return squareRight != null && squareMiddle != null && squareLeft != null
+                ? squareRight+squareMiddle+squareLeft
+                : 0;
     }
 
     private boolean isSameLineWinner(Board board, Character character) {
-        return board.getRows()
-                .stream()
-                .anyMatch(r ->
-                        r.getColumns().stream()
-                                .allMatch(c -> c.getSquare() != null
-                                        && c.getSquare().equals(character)
-                                )
-                );
+        final int winnerResult = character*3;
+
+        return sumColumnsOfRow(board, RowPosition.TOP) == winnerResult
+                || sumColumnsOfRow(board, RowPosition.MIDDLE) == winnerResult
+                || sumColumnsOfRow(board, RowPosition.BOTTOM) == winnerResult;
+    }
+
+    private int sumColumnsOfRow(final Board board, final RowPosition rowPosition) {
+        final var squareLeft = columnService.findBy(rowPosition, ColumnPosition.LEFT, board.getCode()).getSquare();
+        final var squareMiddle = columnService.findBy(rowPosition, ColumnPosition.MIDDLE, board.getCode()).getSquare();
+        final var squareRight = columnService.findBy(rowPosition, ColumnPosition.RIGHT, board.getCode()).getSquare();
+        return squareLeft != null && squareMiddle != null && squareRight != null
+                ? squareLeft+squareMiddle+squareRight
+                : 0;
     }
 
     private boolean isSameColumnWinner(Board board, Character character) {
-        return isWinnerSameLineColumn(board, character, 0)
-                || isWinnerSameLineColumn(board, character, 1)
-                || isWinnerSameLineColumn(board, character, 2);
+        final int winnerResult = character*3;
+
+        return sumSameLineColumn(board, ColumnPosition.LEFT) == winnerResult
+                || sumSameLineColumn(board, ColumnPosition.MIDDLE) == winnerResult
+                || sumSameLineColumn(board, ColumnPosition.RIGHT) == winnerResult;
     }
 
-    private boolean isWinnerSameLineColumn(final Board board, final Character character, final int columnIndex) {
-        ArrayList<Row> rows = new ArrayList<>(board.getRows());
-        ArrayList<Column> columnsRow1 = new ArrayList<>(rows.get(0).getColumns());
-        ArrayList<Column> columnsRow2 = new ArrayList<>(rows.get(1).getColumns());
-        ArrayList<Column> columnsRow3 = new ArrayList<>(rows.get(2).getColumns());
-        return columnsRow1.get(columnIndex).getSquare() == character
-                && columnsRow2.get(columnIndex).getSquare() == character
-                && columnsRow3.get(columnIndex).getSquare() == character;
+    private int sumSameLineColumn(final Board board, final ColumnPosition columnPosition) {
+        final var squareTop = columnService.findBy(RowPosition.TOP, columnPosition, board.getCode()).getSquare();
+        final var squareMiddle = columnService.findBy(RowPosition.MIDDLE, columnPosition, board.getCode()).getSquare();
+        final var squareBottom = columnService.findBy(RowPosition.BOTTOM, columnPosition, board.getCode()).getSquare();
+        return squareTop != null && squareMiddle != null && squareBottom != null
+                ? squareTop+squareMiddle+squareBottom
+                : 0;
     }
 
     private void switchInput(final Board board) {
         board.setInput(board.getInput() == 'X' ? 'O' : 'X');
     }
 
-    private void initRow(final Board board) {
-        Row row = rowService.init(board);
+    private void initRow(final Board board, final RowPosition position) {
+        Row row = rowService.init(board, position);
 
-        columnService.init(row);
-        columnService.init(row);
-        columnService.init(row);
+        columnService.init(row, ColumnPosition.LEFT);
+        columnService.init(row, ColumnPosition.MIDDLE);
+        columnService.init(row, ColumnPosition.RIGHT);
     }
 }

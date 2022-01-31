@@ -14,16 +14,17 @@ public class BoardMapper {
     public static BoardResponseTo from(Board board) {
         return BoardResponseTo
                 .builder()
-                .id(board.getId())
+                .code(board.getCode())
                 .input(board.getInput())
                 .winner(board.getWinner())
                 .rows(board
                         .getRows().stream()
                         .map(r -> RowResponseTo.builder()
+                                .position(r.getPosition())
                                 .columns(r.getColumns().stream()
                                         .map(c -> ColumnResponseTo
                                         .builder()
-                                        .id(c.getId())
+                                        .position(c.getPosition())
                                         .square(c.getSquare())
                                                 .build()
                                         ).collect(Collectors.toList())
