@@ -1,7 +1,6 @@
 package com.borelanjo.tictoctoe.application.service.impl;
 
 import com.borelanjo.tictoctoe.domain.model.Board;
-import com.borelanjo.tictoctoe.domain.model.Column;
 import com.borelanjo.tictoctoe.domain.model.Row;
 import com.borelanjo.tictoctoe.domain.model.RowPosition;
 import com.borelanjo.tictoctoe.domain.service.RowService;
@@ -10,7 +9,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @AllArgsConstructor
