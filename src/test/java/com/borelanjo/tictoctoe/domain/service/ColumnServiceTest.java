@@ -4,6 +4,8 @@ import com.borelanjo.tictoctoe.application.service.exception.AlreadyPlayedThisCo
 import com.borelanjo.tictoctoe.application.service.exception.InvalidInputSquareException;
 import com.borelanjo.tictoctoe.application.service.impl.ColumnServiceImpl;
 import com.borelanjo.tictoctoe.domain.model.Column;
+import com.borelanjo.tictoctoe.domain.model.ColumnPosition;
+import com.borelanjo.tictoctoe.domain.model.Row;
 import com.borelanjo.tictoctoe.infrastructure.persistence.repository.ColumnRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +36,12 @@ class ColumnServiceTest {
     @Test
     void shouldInitANewColumnWhenRequest() {
         mockRepositorySave(getBuild(LocalDateTime.now()).build());
-        final var columnA = columnService.init(null);
+        final var columnA = columnService.init(Row
+                .builder()
+                        .code(UUID.randomUUID())
+                        .id(1L)
+                .createdAt(LocalDateTime.now())
+                .build(), ColumnPosition.RIGHT);
 
         Assertions.assertNotNull(columnA);
         Assertions.assertEquals(1L, columnA.getId());
@@ -67,7 +74,12 @@ class ColumnServiceTest {
 
     @Test
     void shouldNotPlayWhenHaveInvalidInput() {
-        columnService.init(null);
+        final var columnA = columnService.init(Row
+                .builder()
+                .code(UUID.randomUUID())
+                .id(1L)
+                .createdAt(LocalDateTime.now())
+                .build(), ColumnPosition.RIGHT);
         final var invalidInput = '0';
         final var exception = Assertions.assertThrows(
                 InvalidInputSquareException.class, () -> columnService.play(1L, invalidInput));
