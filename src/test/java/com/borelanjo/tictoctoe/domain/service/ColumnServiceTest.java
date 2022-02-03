@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
@@ -21,6 +22,7 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 
+@ActiveProfiles("test")
 class ColumnServiceTest {
 
     private ColumnService columnService;
