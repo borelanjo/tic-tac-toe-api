@@ -1,5 +1,6 @@
 package com.borelanjo.tictoctoe.presentation.dto.column;
 
+import com.borelanjo.tictoctoe.domain.model.ColumnPosition;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +10,6 @@ import lombok.Setter;
 @Builder
 public class ColumnResponseTo {
 
-    private Long id;
+    private ColumnPosition position;
     private Character square;
 }

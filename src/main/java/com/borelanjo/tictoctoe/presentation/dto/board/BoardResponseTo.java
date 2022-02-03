@@ -6,13 +6,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
 @Builder
 public class BoardResponseTo {
 
-    private Long id;
+    private UUID code;
     private Character input;
     private Character winner;
     private List<RowResponseTo> rows;
