@@ -29,7 +29,7 @@ public class RowServiceImpl implements RowService {
     }
 
     @Override
-    public Row find(Long rowId) {
+    public Row find(final Long rowId) {
         return rowRepository.findById(rowId).orElseThrow();
     }
 }

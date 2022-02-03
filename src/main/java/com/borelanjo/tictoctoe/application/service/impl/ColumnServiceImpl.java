@@ -33,10 +33,10 @@ public class ColumnServiceImpl implements ColumnService {
     }
 
     @Override
-    public Column play(Long columnId, Character square) {
+    public Column play(final Long columnId, final Character square) {
         validateInput(square);
 
-        Column column = columnRepository.findById(columnId).orElseThrow();
+        final Column column = columnRepository.findById(columnId).orElseThrow();
 
         validatePlayable(column);
 
@@ -47,19 +47,19 @@ public class ColumnServiceImpl implements ColumnService {
     }
 
     @Override
-    public Column findBy(RowPosition rowPosition, ColumnPosition columnPosition, UUID boardCode) {
+    public Column findBy(final RowPosition rowPosition, final ColumnPosition columnPosition, final UUID boardCode) {
         return columnRepository
                 .findByPositionAndRowPositionAndRowBoardCode(columnPosition, rowPosition, boardCode)
                 .orElseThrow();
     }
 
-    private void validatePlayable(Column column) {
+    private void validatePlayable(final Column column) {
         if (Objects.nonNull(column.getSquare())){
             throw new AlreadyPlayedThisColumnException();
         }
     }
 
-    private void validateInput(Character square) {
+    private void validateInput(final Character square) {
         if ('X' != square && 'O' != square) {
             throw new InvalidInputSquareException(square);
         }

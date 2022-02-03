@@ -157,7 +157,7 @@ public class BoardServiceImpl implements BoardService {
     }
 
     private void initRow(final Board board, final RowPosition position) {
-        Row row = rowService.init(board, position);
+        final Row row = rowService.init(board, position);
 
         columnService.init(row, ColumnPosition.LEFT);
         columnService.init(row, ColumnPosition.MIDDLE);
