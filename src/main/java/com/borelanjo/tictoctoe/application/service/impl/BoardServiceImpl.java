@@ -31,7 +31,7 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public Board init() {
-        Board board = boardRepository.save(Board.builder()
+        final Board board = boardRepository.save(Board.builder()
                 .input('X')
                 .code(UUID.randomUUID())
                 .createdAt(LocalDateTime.now())
@@ -45,12 +45,12 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public Board play(UUID boardCode, RowPosition rowPosition, ColumnPosition columnPosition) {
+    public Board play(final UUID boardCode, final RowPosition rowPosition, final ColumnPosition columnPosition) {
         Board board = find(boardCode);
 
         validateWinner(board);
 
-        Column column = columnService.findBy(rowPosition, columnPosition, board.getCode());
+        final Column column = columnService.findBy(rowPosition, columnPosition, board.getCode());
 
         columnService.play(column.getId(), board.getInput());
 
@@ -64,15 +64,15 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public Board find(UUID boardCode) {
+    public Board find(final UUID boardCode) {
         return boardRepository
                 .findByCode(boardCode)
                 .orElseThrow();
     }
 
     @Override
-    public void checkWinner(Board board) {
-        Optional<Character> winnerX = findWinner(board, 'X');
+    public void checkWinner(final Board board) {
+        final Optional<Character> winnerX = findWinner(board, 'X');
         if (winnerX.isPresent()) {
             board.setWinner(winnerX.get());
             return;
@@ -95,12 +95,12 @@ public class BoardServiceImpl implements BoardService {
                 ? Optional.of(character) : Optional.empty();
     }
 
-    private boolean isDiagonalWinner(Board board, Character character) {
+    private boolean isDiagonalWinner(final Board board, final Character character) {
         final int winnerResult = character*3;
         return sumDiagonalLeft(board) == winnerResult || sumDiagonalRight(board) == winnerResult ;
     }
 
-    private int sumDiagonalLeft(Board board) {
+    private int sumDiagonalLeft(final Board board) {
         final var squareLeft = columnService.findBy(RowPosition.TOP, ColumnPosition.LEFT, board.getCode()).getSquare();
         final var squareMiddle = columnService.findBy(RowPosition.MIDDLE, ColumnPosition.MIDDLE, board.getCode()).getSquare();
         final var squareRight = columnService.findBy(RowPosition.BOTTOM, ColumnPosition.RIGHT, board.getCode()).getSquare();
@@ -109,7 +109,7 @@ public class BoardServiceImpl implements BoardService {
                 : 0;
     }
 
-    private int sumDiagonalRight(Board board) {
+    private int sumDiagonalRight(final Board board) {
         final var squareRight = columnService.findBy(RowPosition.TOP, ColumnPosition.RIGHT, board.getCode()).getSquare();
         final var squareMiddle = columnService.findBy(RowPosition.MIDDLE, ColumnPosition.MIDDLE, board.getCode()).getSquare();
         final var squareLeft = columnService.findBy(RowPosition.BOTTOM, ColumnPosition.LEFT, board.getCode()).getSquare();
@@ -118,7 +118,7 @@ public class BoardServiceImpl implements BoardService {
                 : 0;
     }
 
-    private boolean isSameLineWinner(Board board, Character character) {
+    private boolean isSameLineWinner(final Board board, final Character character) {
         final int winnerResult = character*3;
 
         return sumColumnsOfRow(board, RowPosition.TOP) == winnerResult
@@ -135,8 +135,8 @@ public class BoardServiceImpl implements BoardService {
                 : 0;
     }
 
-    private boolean isSameColumnWinner(Board board, Character character) {
-        final int winnerResult = character*3;
+    private boolean isSameColumnWinner(final Board board, final Character character) {
+        final int winnerResult = character * 3;
 
         return sumSameLineColumn(board, ColumnPosition.LEFT) == winnerResult
                 || sumSameLineColumn(board, ColumnPosition.MIDDLE) == winnerResult
