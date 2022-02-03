@@ -6,17 +6,17 @@ services:
   ######################### DATABASES #########################
   #############################################################
 
-  db-tic-toc-toe:
-    container_name: db-tic-toc-toe
+  db-tic-tac-toe:
+    container_name: db-tic-tac-toe
     image: postgres
     restart: always
-    hostname: db-tic-toc-toe
+    hostname: db-tic-tac-toe
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: tic-toc-toe
+      POSTGRES_DB: tic-tac-toe
       POSTGRES_USER: game
       POSTGRES_PASSWORD: game
       PGDATA: /tmp
     volumes:
-      - ./docker/postgres/data-tic-toc-toe:/var/lib/postgresql/data
+      - ./docker/postgres/data-tic-tac-toe:/var/lib/postgresql/data
