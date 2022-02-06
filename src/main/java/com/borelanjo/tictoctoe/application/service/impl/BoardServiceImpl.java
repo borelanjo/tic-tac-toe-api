@@ -1,14 +1,14 @@
 package com.borelanjo.tictoctoe.application.service.impl;
 
+import com.borelanjo.tictoctoe.application.producer.ColumnProducer;
+import com.borelanjo.tictoctoe.application.producer.RowProducer;
 import com.borelanjo.tictoctoe.application.service.exception.AlreadyWinnerException;
 import com.borelanjo.tictoctoe.domain.model.Board;
 import com.borelanjo.tictoctoe.domain.model.Column;
 import com.borelanjo.tictoctoe.domain.model.ColumnPosition;
-import com.borelanjo.tictoctoe.domain.model.Row;
 import com.borelanjo.tictoctoe.domain.model.RowPosition;
 import com.borelanjo.tictoctoe.domain.service.BoardService;
 import com.borelanjo.tictoctoe.domain.service.ColumnService;
-import com.borelanjo.tictoctoe.domain.service.RowService;
 import com.borelanjo.tictoctoe.infrastructure.persistence.repository.BoardRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,21 +25,15 @@ public class BoardServiceImpl implements BoardService {
 
     private final BoardRepository boardRepository;
 
-    private final RowService rowService;
-
     private final ColumnService columnService;
 
     @Override
-    public Board init() {
+    public Board init(final UUID boardCode) {
         final Board board = boardRepository.save(Board.builder()
                 .input('X')
-                .code(UUID.randomUUID())
+                .code(boardCode)
                 .createdAt(LocalDateTime.now())
                 .build());
-
-        initRow(board, RowPosition.TOP);
-        initRow(board, RowPosition.MIDDLE);
-        initRow(board, RowPosition.BOTTOM);
 
         return find(board.getCode());
     }
@@ -156,11 +150,5 @@ public class BoardServiceImpl implements BoardService {
         board.setInput(board.getInput() == 'X' ? 'O' : 'X');
     }
 
-    private void initRow(final Board board, final RowPosition position) {
-        final Row row = rowService.init(board, position);
 
-        columnService.init(row, ColumnPosition.LEFT);
-        columnService.init(row, ColumnPosition.MIDDLE);
-        columnService.init(row, ColumnPosition.RIGHT);
-    }
 }

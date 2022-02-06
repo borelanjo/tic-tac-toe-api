@@ -6,13 +6,7 @@ import com.borelanjo.tictoctoe.domain.model.RowPosition;
 
 import java.util.UUID;
 
-public interface BoardService {
+public interface InitGameService {
 
-    Board init(UUID boardCode);
-
-    Board play(UUID boardCode, RowPosition rowPosition, ColumnPosition columnPosition);
-
-    Board find(UUID boardCode);
-
-    void checkWinner(Board board);
+    void process(UUID boardCode);
 }

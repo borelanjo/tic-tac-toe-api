@@ -15,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -29,7 +30,7 @@ class BoardServiceIntegrationTest {
     @Test
     public void shouldInitANewGameWhenRequest() {
         final Long expectedBoardId = getNextBoardId();
-        final var board = boardService.init();
+        final var board = boardService.init(UUID.randomUUID());
 
         Assertions.assertNotNull(board);
         Assertions.assertEquals(expectedBoardId, board.getId());
@@ -80,7 +81,7 @@ class BoardServiceIntegrationTest {
 
     @Test
     public void shouldPlay() {
-        var boardCode = boardService.init().getCode();
+        var boardCode = boardService.init(UUID.randomUUID()).getCode();
 
         boardService.play(boardCode, RowPosition.TOP, ColumnPosition.LEFT);
         boardService.play(boardCode, RowPosition.TOP, ColumnPosition.MIDDLE);
@@ -101,7 +102,7 @@ class BoardServiceIntegrationTest {
 
     @Test
     public void shouldXWinWhenSameRowHasXAtAllSquare() {
-        var boardCode = boardService.init().getCode();
+        var boardCode = boardService.init(UUID.randomUUID()).getCode();
 
         boardService.play(boardCode, RowPosition.TOP, ColumnPosition.LEFT);
         boardService.play(boardCode, RowPosition.MIDDLE, ColumnPosition.MIDDLE);
@@ -116,7 +117,7 @@ class BoardServiceIntegrationTest {
 
     @Test
     public void shouldXWinWhenSameColumnHasXAtAllSquare() {
-        var boardCode = boardService.init().getCode();
+        var boardCode = boardService.init(UUID.randomUUID()).getCode();
 
         boardService.play(boardCode, RowPosition.TOP, ColumnPosition.LEFT);
         boardService.play(boardCode, RowPosition.MIDDLE, ColumnPosition.MIDDLE);
@@ -131,7 +132,7 @@ class BoardServiceIntegrationTest {
 
     @Test
     public void shouldOWinWhenSameRowHasOAtAllSquare() {
-        var boardCode = boardService.init().getCode();
+        var boardCode = boardService.init(UUID.randomUUID()).getCode();
 
         boardService.play(boardCode, RowPosition.TOP, ColumnPosition.RIGHT);
         boardService.play(boardCode, RowPosition.BOTTOM, ColumnPosition.LEFT);
@@ -147,7 +148,7 @@ class BoardServiceIntegrationTest {
 
     @Test
     public void shouldXWinWhenSameDiagonalHasXAtAllSquare() {
-        var boardCode = boardService.init().getCode();
+        var boardCode = boardService.init(UUID.randomUUID()).getCode();
 
         boardService.play(boardCode, RowPosition.TOP, ColumnPosition.LEFT);
         boardService.play(boardCode, RowPosition.BOTTOM, ColumnPosition.LEFT);
@@ -162,7 +163,7 @@ class BoardServiceIntegrationTest {
 
     @Test
     public void shouldOWinWhenSameDiagonalHasXAtAllSquare() {
-        var boardCode = boardService.init().getCode();
+        var boardCode = boardService.init(UUID.randomUUID()).getCode();
 
         boardService.play(boardCode, RowPosition.BOTTOM, ColumnPosition.MIDDLE);
         boardService.play(boardCode, RowPosition.TOP, ColumnPosition.RIGHT);
@@ -178,7 +179,7 @@ class BoardServiceIntegrationTest {
 
     @Test
     public void shouldOWinWhenSameColumnHasXAtAllSquare() {
-        var boardCode = boardService.init().getCode();
+        var boardCode = boardService.init(UUID.randomUUID()).getCode();
 
         boardService.play(boardCode, RowPosition.BOTTOM, ColumnPosition.RIGHT);
         boardService.play(boardCode, RowPosition.MIDDLE, ColumnPosition.MIDDLE);
@@ -196,7 +197,7 @@ class BoardServiceIntegrationTest {
 
     @Test
     public void shouldNotPlayWhenAlreadyExistsAWinner() {
-        var boardCode = boardService.init().getCode();
+        var boardCode = boardService.init(UUID.randomUUID()).getCode();
 
         boardService.play(boardCode, RowPosition.TOP, ColumnPosition.LEFT);
         boardService.play(boardCode, RowPosition.MIDDLE, ColumnPosition.MIDDLE);

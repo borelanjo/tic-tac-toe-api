@@ -17,6 +17,7 @@ import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 @Builder
@@ -66,12 +67,14 @@ public class Board {
 
     @Override
     public String toString() {
-        return String.format("Board{id=%s, input=%s, winner=%s, \nrows=[\n%s,\n%s\n%s]\n}",
-                getId(),
-                getInput(),
-                getWinner(),
-                getRows().toArray()[0],
-                getRows().toArray()[1],
-                 getRows().toArray()[2]);
+        return new StringJoiner(", ", Board.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("code=" + code)
+                .add("input=" + input)
+                .add("rows=" + rows)
+                .add("winner=" + winner)
+                .add("createdAt=" + createdAt)
+                .add("updatedAt=" + updatedAt)
+                .toString();
     }
 }

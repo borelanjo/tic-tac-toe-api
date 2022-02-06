@@ -16,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 @Builder
@@ -66,6 +67,14 @@ public class Column {
 
     @Override
     public String toString() {
-        return square != null ? square.toString() : " ";
+        return new StringJoiner(", ", Column.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("code=" + code)
+                .add("square=" + square)
+                .add("row=" + (row != null ? row.getCode() : null))
+                .add("position=" + position)
+                .add("createdAt=" + createdAt)
+                .add("updatedAt=" + updatedAt)
+                .toString();
     }
 }

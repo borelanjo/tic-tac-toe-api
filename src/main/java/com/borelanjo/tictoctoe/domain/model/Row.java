@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 @Builder
@@ -72,9 +73,14 @@ public class Row {
 
     @Override
     public String toString() {
-        return "Row{" +
-                "position=" + position +
-                ", columns=" + columns +
-                '}';
+        return new StringJoiner(", ", Row.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("code=" + code)
+                .add("board=" + (board != null ? board.getCode() : null))
+                .add("position=" + position)
+                .add("columns=" + columns)
+                .add("createdAt=" + createdAt)
+                .add("updatedAt=" + updatedAt)
+                .toString();
     }
 }

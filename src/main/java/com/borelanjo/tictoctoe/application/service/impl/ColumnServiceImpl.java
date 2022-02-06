@@ -36,7 +36,8 @@ public class ColumnServiceImpl implements ColumnService {
     public Column play(final Long columnId, final Character square) {
         validateInput(square);
 
-        final Column column = columnRepository.findById(columnId).orElseThrow();
+        final Column column = columnRepository.findById(columnId)
+                .orElseThrow();
 
         validatePlayable(column);
 

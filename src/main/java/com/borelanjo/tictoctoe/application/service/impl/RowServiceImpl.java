@@ -32,4 +32,9 @@ public class RowServiceImpl implements RowService {
     public Row find(final Long rowId) {
         return rowRepository.findById(rowId).orElseThrow();
     }
+
+    @Override
+    public Row find(final UUID boardCode, final RowPosition position) {
+        return rowRepository.findByBoardCodeAndPosition(boardCode, position);
+    }
 }
