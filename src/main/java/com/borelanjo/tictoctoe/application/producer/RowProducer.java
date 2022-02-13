@@ -17,11 +17,13 @@ public class RowProducer {
     private final KafkaTemplate kafkaTemplate;
 
     public void sendToInit(final UUID boardCode, final RowPosition rowPosition) {
-        kafkaTemplate.send("row-init", boardCode.toString(), RowRequestTo
+        RowRequestTo requestTo = RowRequestTo
                 .builder()
                 .boardCode(boardCode)
                 .position(rowPosition)
-                .build());
+                .build();
+        kafkaTemplate.send("row-init", boardCode.toString(), requestTo);
+        log.info("msg=Mensagem produzida, requestTo={}", requestTo);
     }
 
 }

@@ -17,6 +17,7 @@ public class BoardProducer {
 
     public void sendToInit(final UUID boardCode) {
         kafkaTemplate.send("board-init", boardCode.toString(), boardCode);
+        log.info("msg=Mensagem produzida, boardCode={}", boardCode);
     }
 
 }

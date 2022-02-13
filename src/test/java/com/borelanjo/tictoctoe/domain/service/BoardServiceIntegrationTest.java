@@ -1,5 +1,8 @@
 package com.borelanjo.tictoctoe.domain.service;
 
+import com.borelanjo.tictoctoe.application.consumer.BoardConsumer;
+import com.borelanjo.tictoctoe.application.consumer.ColumnConsumer;
+import com.borelanjo.tictoctoe.application.consumer.RowConsumer;
 import com.borelanjo.tictoctoe.application.service.exception.AlreadyWinnerException;
 import com.borelanjo.tictoctoe.domain.model.Board;
 import com.borelanjo.tictoctoe.domain.model.Column;
@@ -7,18 +10,21 @@ import com.borelanjo.tictoctoe.domain.model.ColumnPosition;
 import com.borelanjo.tictoctoe.domain.model.Row;
 import com.borelanjo.tictoctoe.domain.model.RowPosition;
 import com.borelanjo.tictoctoe.infrastructure.persistence.repository.BoardRepository;
+import com.borelanjo.tictoctoe.presentation.dto.column.ColumnRequestTo;
+import com.borelanjo.tictoctoe.presentation.dto.row.RowRequestTo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.test.annotation.DirtiesContext;
 
-import java.util.Comparator;
-import java.util.List;
 import java.util.UUID;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@DirtiesContext
+@EmbeddedKafka(partitions = 10, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
 class BoardServiceIntegrationTest {
 
     @Autowired
@@ -27,61 +33,29 @@ class BoardServiceIntegrationTest {
     @Autowired
     private BoardRepository boardRepository;
 
+    @SpyBean
+    private BoardConsumer boardConsumer;
+
+    @SpyBean
+    private RowConsumer rowConsumer;
+
+    @SpyBean
+    private ColumnConsumer columnConsumer;
+
     @Test
     public void shouldInitANewGameWhenRequest() {
-        final Long expectedBoardId = getNextBoardId();
         final var board = boardService.init(UUID.randomUUID());
 
         Assertions.assertNotNull(board);
-        Assertions.assertEquals(expectedBoardId, board.getId());
-
-        final var rowTop = getRow(board, RowPosition.TOP);
-        final var rowTopColumnLeft = getColumn(rowTop, ColumnPosition.LEFT);
-        final var rowTopColumnMiddle = getColumn(rowTop, ColumnPosition.MIDDLE);
-        final var rowTopColumnRight = getColumn(rowTop, ColumnPosition.RIGHT);
-
-        final var rowMiddle = getRow(board, RowPosition.MIDDLE);
-        final var rowMiddleColumnLeft = getColumn(rowMiddle, ColumnPosition.LEFT);
-        final var rowMiddleColumnMiddle = getColumn(rowMiddle, ColumnPosition.MIDDLE);
-        final var rowMiddleColumnRight = getColumn(rowMiddle, ColumnPosition.RIGHT);
-
-        final var rowBottom = getRow(board, RowPosition.BOTTOM);
-        final var rowBottomColumnLeft = getColumn(rowBottom, ColumnPosition.LEFT);
-        final var rowBottomColumnMiddle = getColumn(rowBottom, ColumnPosition.MIDDLE);
-        final var rowBottomColumnRight = getColumn(rowBottom, ColumnPosition.RIGHT);
-
-        Assertions.assertNotNull(rowTop);
-        Assertions.assertEquals(RowPosition.TOP, rowTop.getPosition());
-        Assertions.assertNotNull(rowTopColumnLeft);
-        Assertions.assertNotNull(rowTopColumnMiddle);
-        Assertions.assertNotNull(rowTopColumnRight);
-        Assertions.assertNull(rowTopColumnLeft.getSquare());
-        Assertions.assertNull(rowTopColumnMiddle.getSquare());
-        Assertions.assertNull(rowTopColumnRight.getSquare());
-
-        Assertions.assertNotNull(rowMiddle);
-        Assertions.assertEquals(RowPosition.MIDDLE, rowMiddle.getPosition());
-        Assertions.assertNotNull(rowMiddleColumnLeft);
-        Assertions.assertNotNull(rowMiddleColumnMiddle);
-        Assertions.assertNotNull(rowMiddleColumnRight);
-        Assertions.assertNull(rowMiddleColumnLeft.getSquare());
-        Assertions.assertNull(rowMiddleColumnMiddle.getSquare());
-        Assertions.assertNull(rowMiddleColumnRight.getSquare());
-
-        Assertions.assertNotNull(rowBottom);
-        Assertions.assertEquals(RowPosition.BOTTOM, rowBottom.getPosition());
-        Assertions.assertNotNull(rowBottomColumnLeft);
-        Assertions.assertNotNull(rowBottomColumnMiddle);
-        Assertions.assertNotNull(rowBottomColumnRight);
-        Assertions.assertNull(rowBottomColumnLeft.getSquare());
-        Assertions.assertNull(rowBottomColumnMiddle.getSquare());
-        Assertions.assertNull(rowBottomColumnRight.getSquare());
+        Assertions.assertEquals('X', board.getInput());
+        Assertions.assertNull(board.getWinner());
+        Assertions.assertNull(board.getUpdatedAt());
 
     }
 
     @Test
     public void shouldPlay() {
-        var boardCode = boardService.init(UUID.randomUUID()).getCode();
+        final UUID boardCode = initGame();
 
         boardService.play(boardCode, RowPosition.TOP, ColumnPosition.LEFT);
         boardService.play(boardCode, RowPosition.TOP, ColumnPosition.MIDDLE);
@@ -102,7 +76,7 @@ class BoardServiceIntegrationTest {
 
     @Test
     public void shouldXWinWhenSameRowHasXAtAllSquare() {
-        var boardCode = boardService.init(UUID.randomUUID()).getCode();
+        final UUID boardCode = initGame();
 
         boardService.play(boardCode, RowPosition.TOP, ColumnPosition.LEFT);
         boardService.play(boardCode, RowPosition.MIDDLE, ColumnPosition.MIDDLE);
@@ -117,7 +91,7 @@ class BoardServiceIntegrationTest {
 
     @Test
     public void shouldXWinWhenSameColumnHasXAtAllSquare() {
-        var boardCode = boardService.init(UUID.randomUUID()).getCode();
+        final UUID boardCode = initGame();
 
         boardService.play(boardCode, RowPosition.TOP, ColumnPosition.LEFT);
         boardService.play(boardCode, RowPosition.MIDDLE, ColumnPosition.MIDDLE);
@@ -132,7 +106,7 @@ class BoardServiceIntegrationTest {
 
     @Test
     public void shouldOWinWhenSameRowHasOAtAllSquare() {
-        var boardCode = boardService.init(UUID.randomUUID()).getCode();
+        final UUID boardCode = initGame();
 
         boardService.play(boardCode, RowPosition.TOP, ColumnPosition.RIGHT);
         boardService.play(boardCode, RowPosition.BOTTOM, ColumnPosition.LEFT);
@@ -148,7 +122,7 @@ class BoardServiceIntegrationTest {
 
     @Test
     public void shouldXWinWhenSameDiagonalHasXAtAllSquare() {
-        var boardCode = boardService.init(UUID.randomUUID()).getCode();
+        final UUID boardCode = initGame();
 
         boardService.play(boardCode, RowPosition.TOP, ColumnPosition.LEFT);
         boardService.play(boardCode, RowPosition.BOTTOM, ColumnPosition.LEFT);
@@ -163,7 +137,7 @@ class BoardServiceIntegrationTest {
 
     @Test
     public void shouldOWinWhenSameDiagonalHasXAtAllSquare() {
-        var boardCode = boardService.init(UUID.randomUUID()).getCode();
+        final UUID boardCode = initGame();
 
         boardService.play(boardCode, RowPosition.BOTTOM, ColumnPosition.MIDDLE);
         boardService.play(boardCode, RowPosition.TOP, ColumnPosition.RIGHT);
@@ -179,7 +153,7 @@ class BoardServiceIntegrationTest {
 
     @Test
     public void shouldOWinWhenSameColumnHasXAtAllSquare() {
-        var boardCode = boardService.init(UUID.randomUUID()).getCode();
+        final UUID boardCode = initGame();
 
         boardService.play(boardCode, RowPosition.BOTTOM, ColumnPosition.RIGHT);
         boardService.play(boardCode, RowPosition.MIDDLE, ColumnPosition.MIDDLE);
@@ -197,7 +171,7 @@ class BoardServiceIntegrationTest {
 
     @Test
     public void shouldNotPlayWhenAlreadyExistsAWinner() {
-        var boardCode = boardService.init(UUID.randomUUID()).getCode();
+        final UUID boardCode = initGame();
 
         boardService.play(boardCode, RowPosition.TOP, ColumnPosition.LEFT);
         boardService.play(boardCode, RowPosition.MIDDLE, ColumnPosition.MIDDLE);
@@ -214,20 +188,62 @@ class BoardServiceIntegrationTest {
 
     }
 
-    private long getNextBoardId() {
-        List<Board> boards = boardRepository.findAll();
-        return boards.isEmpty() ? 1L : boards.stream().max(Comparator.comparing(Board::getId)).get().getId() + 1;
-    }
-
-    private Row getRow(Board board, RowPosition top) {
+    private Row getRow(final Board board, final RowPosition position) {
         return board.getRows().stream()
-                .filter(r -> r.getPosition().equals(top)).findFirst().orElseThrow();
+                .filter(r -> r.getPosition().equals(position)).findFirst().orElseThrow();
     }
 
+    private Column getColumn(final Row row, final ColumnPosition position) {
+        return row.getColumns().stream()
+                .filter(c -> c.getPosition().equals(position)).findFirst().orElseThrow();
+    }
 
-    private Column getColumn(Row rowTop, ColumnPosition left) {
-        return rowTop.getColumns().stream()
-                .filter(c -> c.getPosition().equals(left)).findFirst().orElseThrow();
+    private UUID initGame() {
+        final var boardCode = UUID.randomUUID();
+
+        boardConsumer.receiveInit(boardCode);
+
+        rowReceiveInit(boardCode, RowPosition.TOP);
+
+        columnReceiveInit(boardCode, RowPosition.TOP, ColumnPosition.LEFT);
+
+        columnReceiveInit(boardCode, RowPosition.TOP, ColumnPosition.MIDDLE);
+
+        columnReceiveInit(boardCode, RowPosition.TOP, ColumnPosition.RIGHT);
+
+        rowReceiveInit(boardCode, RowPosition.MIDDLE);
+
+        columnReceiveInit(boardCode, RowPosition.MIDDLE, ColumnPosition.LEFT);
+
+        columnReceiveInit(boardCode, RowPosition.MIDDLE, ColumnPosition.MIDDLE);
+
+        columnReceiveInit(boardCode, RowPosition.MIDDLE, ColumnPosition.RIGHT);
+
+        rowReceiveInit(boardCode, RowPosition.BOTTOM);
+
+        columnReceiveInit(boardCode, RowPosition.BOTTOM, ColumnPosition.LEFT);
+
+        columnReceiveInit(boardCode, RowPosition.BOTTOM, ColumnPosition.MIDDLE);
+
+        columnReceiveInit(boardCode, RowPosition.BOTTOM, ColumnPosition.RIGHT);
+        return boardCode;
+    }
+
+    private void columnReceiveInit(UUID boardCode, RowPosition middle, ColumnPosition left) {
+        columnConsumer.receiveInit(ColumnRequestTo
+                .builder()
+                .boardCode(boardCode)
+                .rowPosition(middle)
+                .position(left)
+                .build());
+    }
+
+    private void rowReceiveInit(UUID boardCode, RowPosition top) {
+        rowConsumer.receiveInit(RowRequestTo
+                .builder()
+                .boardCode(boardCode)
+                .position(top)
+                .build());
     }
 
 }

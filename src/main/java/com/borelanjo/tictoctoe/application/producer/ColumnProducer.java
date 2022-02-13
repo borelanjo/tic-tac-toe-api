@@ -19,12 +19,14 @@ public class ColumnProducer {
     private final KafkaTemplate kafkaTemplate;
 
     public void sendToInit(final UUID boardCode, final RowPosition rowPosition, final ColumnPosition position) {
-        kafkaTemplate.send("column-init", boardCode.toString(), ColumnRequestTo
+        ColumnRequestTo requestTo = ColumnRequestTo
                 .builder()
                 .boardCode(boardCode)
                 .rowPosition(rowPosition)
                 .position(position)
-                .build());
+                .build();
+        kafkaTemplate.send("column-init", boardCode.toString(), requestTo);
+        log.info("msg=Mensagem produzida, requestTo={}", requestTo);
     }
 
 }
