@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.UUID;
 
@@ -29,7 +30,8 @@ import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @DirtiesContext
-@EmbeddedKafka(partitions = 10, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
+@EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
+@ActiveProfiles("test")
 class InitGameServiceIntegrationTest {
 
     @Autowired
@@ -65,11 +67,11 @@ class InitGameServiceIntegrationTest {
         initGameService.process(boardCode);
 
         //consumer
-        verify(boardConsumer, timeout(100000).atLeast(1)).receiveInit(boardCodeCaptor.capture());
+        verify(boardConsumer, timeout(100000).times(1)).receiveInit(boardCodeCaptor.capture());
 
-        verify(rowConsumer, timeout(100000).atLeast(3)).receiveInit(rowRequestCaptor.capture());
+        verify(rowConsumer, timeout(100000).times(3)).receiveInit(rowRequestCaptor.capture());
 
-        verify(columnConsumer, timeout(100000).atLeast(9)).receiveInit(columnRequestCaptor.capture());
+        verify(columnConsumer, timeout(100000).times(10)).receiveInit(columnRequestCaptor.capture());
 
         final Board board = boardService.find(boardCode);
 
